@@ -15,7 +15,7 @@ let acompanhamentos = [
       { id: 'banana', nome: 'Banana', preco: 3.00, emoji: '🍌' },
       { id: 'morango', nome: 'Morango', preco: 4.00, emoji: '🍓' },
       { id: 'abacaxi', nome: 'Abacaxi', preco: 4.00, emoji: '🍍' },
-      { id: 'maracuja', nome: 'Maracujá', preco: 3.50, emoji: '🍇' },
+      { id: 'maracuja', nome: 'Maracujá', preco: 3.50, emoji: '' },
       { id: 'uva-verde', nome: 'Uva verde', preco: 4.00, emoji: '🍇' },
     ],
   },
