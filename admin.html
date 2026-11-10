@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin | Factory Açaí</title>
+   <link rel="icon" type="image/png" href="logos.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+</head>
+<body>
+  <!-- Barra lateral -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Factory Açaí" class="sidebar-logo" />
+      <span>FACTORY<span class="accent">AÇAÍ</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-title">GESTÃO</div>
+      <a href="#" class="nav-item active" data-view="dashboard">📊 Dashboard</a>
+      <a href="#" class="nav-item" data-view="pedidos">📦 Pedidos</a>
+      <a href="#" class="nav-item" data-view="fechamento">💰 Fechamento de caixa</a>
+      <div class="nav-group-title">AÇAÍ</div>
+      <a href="#" class="nav-item" data-view="produtos" data-categoria="Açaí">🥤 Tamanho dos Copos</a>
+      <a href="#" class="nav-item" data-view="acompanhamentos" data-categoria="Frutas">🍓 Frutas</a>
+      <a href="#" class="nav-item" data-view="acompanhamentos" data-categoria="Chocolates, doces e complementos">🍫 Complementos</a>
+      <a href="#" class="nav-item" data-view="acompanhamentos" data-categoria="Bebidas">🥤 Bebidas</a>
+      <div class="nav-group-title">SALADA DE FRUTA</div>
+      <a href="#" class="nav-item" data-view="produtos" data-categoria="Salada de frutas">🥣 Tamanho dos Copos</a>
+      <a href="#" class="nav-item" data-view="acompanhamentos" data-categoria="Frutas da Salada">🍓 Frutas</a>
+      <a href="#" class="nav-item" data-view="acompanhamentos" data-categoria="Chocolates, doces e complementos">➕ Adicionais</a>
+      <a href="#" class="nav-item" data-view="acompanhamentos" data-categoria="Bebidas">🥤 Bebidas</a>
+      <a href="#" class="nav-item logout" id="btn-logout">🚪 Sair</a>
+    </nav>
+    <div class="sidebar-footer">
+      <small>Factory Açaí Delivery</small>
+    </div>
+  </aside>
+
+  <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Fechar menu"></button>
+
+  <!-- Conteúdo principal -->
+  <main class="main-content">
+    <header class="main-header">
+      <button type="button" class="admin-menu-toggle" id="admin-menu-toggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
+      <h1 id="page-title">Dashboard</h1>
+      <div class="user-info">
+        <span>Admin</span>
+      </div>
+    </header>
+
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total-produtos">0</div>
+          <div class="stat-label">Produtos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total-acompanhamentos">0</div>
+          <div class="stat-label">Acompanhamentos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total-pedidos">0</div>
+          <div class="stat-label">Pedidos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-receita">R$ 0,00</div>
+          <div class="stat-label">Receita Total</div>
+        </div>
+      </div>
+
+      <div class="dashboard-resumo">
+        <h3>Resumo Rápido</h3>
+        <p>Bem-vindo ao painel da Factory Açaí. Gerencie produtos, acompanhamentos e pedidos de delivery.</p>
+        <div class="acoes-rapidas">
+          <button class="btn btn-primary" onclick="app.mudarView('produtos')">Gerenciar Produtos</button>
+          <button class="btn btn-outline" onclick="app.mudarView('pedidos')">Ver Pedidos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Produtos (CRUD) -->
+    <section id="view-produtos" class="view">
+      <div class="page-header">
+        <div>
+          <h2 id="titulo-produtos">Tamanhos dos Copos</h2>
+          <p>Gerencie os itens do cardápio</p>
+        </div>
+        <button class="btn btn-primary" id="btn-novo-produto">+ Novo Produto</button>
+      </div>
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabela-produtos">
+          <thead>
+            <tr>
+              <th>Imagem</th>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Descrição</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-produtos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Acompanhamentos (CRUD) -->
+    <section id="view-acompanhamentos" class="view">
+      <div class="page-header">
+        <div>
+          <h2 id="titulo-acompanhamentos">Complementos</h2>
+          <p>Gerencie complementos e extras</p>
+        </div>
+        <button class="btn btn-primary" id="btn-novo-acompanhamento">+ Novo Acompanhamento</button>
+      </div>
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabela-acompanhamentos">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-acompanhamentos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Pedidos -->
+    <section id="view-pedidos" class="view">
+      <div class="page-header">
+        <div>
+          <h2>Pedidos</h2>
+          <p>Pedidos em andamento e pedidos entregues, organizados em listas separadas.</p>
+        </div>
+      </div>
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabela-pedidos">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Endereço</th>
+              <th>Pagamento</th>
+              <th>Total</th>
+              <th>Observações</th>
+              <th>Status</th>
+              <th>Data</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-pedidos"></tbody>
+        </table>
+      </div>
+      <div class="page-header pedidos-subtitulo">
+        <div><h2>Pedidos entregues</h2><p>Os pedidos saem da lista de preparo e ficam organizados aqui.</p></div>
+      </div>
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabela-pedidos-entregues">
+          <thead><tr><th>#</th><th>Cliente</th><th>Telefone</th><th>Endereço</th><th>Pagamento</th><th>Total</th><th>Observações</th><th>Data</th><th>Ações</th></tr></thead>
+          <tbody id="tbody-pedidos-entregues"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Fechamento de Caixa -->
+    <section id="view-fechamento" class="view">
+      <div class="page-header">
+        <div>
+          <h2>Fechamento de Caixa</h2>
+          <p>Somente pedidos com status Entregue entram automaticamente no caixa.</p>
+        </div>
+        <div class="fechamento-actions">
+          <button class="btn btn-primary" onclick="app.exportarPedidos()">📥 Exportar CSV</button>
+        </div>
+      </div>
+
+      <!-- Filtro por data -->
+      <div class="filtro-fechamento">
+        <div class="campo">
+          <label>Data Inicial</label>
+          <input type="date" id="data-inicio">
+        </div>
+        <div class="campo">
+          <label>Data Final</label>
+          <input type="date" id="data-fim">
+        </div>
+        <button class="btn btn-primary" id="btn-filtrar-fechamento">🔍 Filtrar</button>
+        <button class="btn btn-outline" id="btn-limpar-filtro">🔄 Limpar</button>
+      </div>
+
+      <!-- Resumo do caixa -->
+      <div class="resumo-caixa">
+        <div class="stat-card card-total-pedidos">
+          <div class="stat-value" id="stat-total-pedidos-fechamento">0</div>
+          <div class="stat-label">Total de Pedidos</div>
+        </div>
+        <div class="stat-card card-receita-total">
+          <div class="stat-value" id="stat-receita-total-fechamento">R$ 0,00</div>
+          <div class="stat-label">Receita Total</div>
+        </div>
+        <div class="stat-card card-pedidos-pendentes">
+          <div class="stat-value" id="stat-pedidos-pendentes">0</div>
+          <div class="stat-label">Pendentes</div>
+        </div>
+        <div class="stat-card card-pedidos-entregues">
+          <div class="stat-value" id="stat-pedidos-entregues">0</div>
+          <div class="stat-label">Entregues</div>
+        </div>
+        <div class="stat-card card-medio-por-pedido">
+          <div class="stat-value" id="stat-medio-por-pedido">R$ 0,00</div>
+          <div class="stat-label">Média por Pedido</div>
+        </div>
+      </div>
+
+      <!-- Resumo por pagamento -->
+      <div class="resumo-pagamento">
+        <h3>Por Forma de Pagamento</h3>
+        <div class="resumo-pagamento-lista" id="resumo-pagamento-lista">
+          <!-- carregado via JS -->
+        </div>
+      </div>
+
+      <!-- Tabela detalhada -->
+      <div class="tabela-wrapper">
+        <table class="tabela" id="tabela-fechamento">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Endereço</th>
+              <th>Pagamento</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Data/Hora</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-fechamento"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Modal Formulário (Produto/Acompanhamento) -->
+    <div class="modal" id="modal-form" aria-hidden="true">
+      <div class="modal-overlay" data-fechar></div>
+      <div class="modal-content" role="dialog" aria-modal="true">
+        <button class="fechar" data-fechar>✕</button>
+        <h3 id="modal-titulo">Novo Item</h3>
+        <form id="form-item">
+          <input type="hidden" id="form-id">
+          <input type="hidden" id="form-tipo">
+          <div class="campo">
+            <label>Nome</label>
+            <input type="text" id="form-nome" required placeholder="Nome do item">
+          </div>
+          <div class="campo campo-emoji">
+            <label for="form-emoji">Emoji do produto</label>
+            <div class="emoji-editor">
+              <input type="text" id="form-emoji" maxlength="12" placeholder="Ex.: 🍓, 🥤, 🥣" autocomplete="off" aria-describedby="emoji-ajuda">
+              <span id="form-emoji-preview" class="emoji-preview" aria-hidden="true">✨</span>
+            </div>
+            <small id="emoji-ajuda">Digite ou cole qualquer emoji. Ele será exibido no cardápio e no painel.</small>
+            <div class="emoji-sugestoes" aria-label="Sugestões de emojis">
+              <button type="button" data-emoji="🍓">🍓</button><button type="button" data-emoji="🥤">🥤</button><button type="button" data-emoji="🥣">🥣</button><button type="button" data-emoji="🍇">🍇</button><button type="button" data-emoji="🍌">🍌</button><button type="button" data-emoji="🍫">🍫</button><button type="button" data-emoji="🥭">🥭</button><button type="button" data-emoji="🍍">🍍</button><button type="button" data-emoji="🍒">🍒</button><button type="button" data-emoji="⭐">⭐</button>
+            </div>
+          </div>
+          <div class="campo">
+            <label>Categoria</label>
+            <input type="text" id="form-categoria" required placeholder="Ex.: Açaí, Bebidas, Frutas da Salada">
+          </div>
+          <div class="campo">
+            <label>Preço (R$)</label>
+            <input type="number" id="form-preco" step="0.01" min="0" required placeholder="0,00">
+          </div>
+          <div class="campo">
+            <label>Descrição</label>
+            <textarea id="form-descricao" rows="3" placeholder="Descrição do item"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" id="btn-cancelar-form">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Confirmação Exclusão -->
+    <div class="modal" id="modal-excluir" aria-hidden="true">
+      <div class="modal-overlay" data-fechar></div>
+      <div class="modal-content" role="dialog" aria-modal="true">
+        <button class="fechar" data-fechar>✕</button>
+        <h3>Excluir Item</h3>
+        <p>Tem certeza que deseja excluir <strong id="excluir-nome">este item</strong>?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="btn-cancelar-excluir">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btn-confirmar-excluir">Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Detalhes do Pedido -->
+    <div class="modal" id="modal-pedido-detalhes" aria-hidden="true">
+      <div class="modal-overlay" data-fechar></div>
+      <div class="modal-content pedido-detalhe-modal" role="dialog" aria-modal="true" aria-label="Detalhes do pedido">
+        <button class="fechar" data-fechar>✕</button>
+        <div class="pedido-detalhe-cabecalho">
+          <span class="pedido-detalhe-selo">FACTORY AÇAÍ · PEDIDO</span>
+          <div class="pedido-cabecalho-campo"><small>Nome do cliente:</small><strong id="detalhe-cliente"></strong></div>
+          <div class="pedido-cabecalho-campo"><small>Data e hora:</small><span class="pedido-detalhe-data" id="detalhe-data"></span></div>
+          <h3>ID do pedido: #<span id="detalhe-numero"></span></h3>
+        </div>
+        <section class="pedido-detalhe-secao">
+          <h4>Dados do cliente</h4>
+          <div class="pedido-dado"><small>Telefone</small><strong id="detalhe-telefone"></strong></div>
+        </section>
+        <section class="pedido-detalhe-secao">
+          <h4>Pedido</h4>
+          <div id="detalhe-itens" class="pedido-itens-lista">Carregando itens...</div>
+          <div class="pedido-observacoes" hidden><small>Observações</small><div id="detalhe-observacoes"></div></div>
+        </section>
+        <section class="pedido-detalhe-secao">
+          <h4>Entrega e pagamento</h4>
+          <div class="pedido-dado"><small>Endereço</small><strong id="detalhe-endereco"></strong></div>
+          <div class="pedido-detalhe-grade">
+            <div class="pedido-dado"><small>Forma de pagamento</small><strong id="detalhe-pagamento"></strong></div>
+            <div class="pedido-dado pedido-total"><small>Valor total</small><strong id="detalhe-total"></strong></div>
+          </div>
+        </section>
+        <section class="pedido-detalhe-status">
+          <label for="detalhe-status-select">Status do pedido</label>
+          <select id="detalhe-status-select">
+            <option value="Pendente">Pendente</option>
+            <option value="Em preparo">Em preparo</option>
+            <option value="Saiu para entrega">Saiu para entrega</option>
+            <option value="Entregue">Entregue</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </section>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="fecharModalPedidoDetalhes()">Fechar</button>
+          <button type="button" class="btn btn-primary" id="btn-salvar-status-detalhe">Salvar Status</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast de notificação -->
+    <div class="toast" id="toast"></div>
+
+    <script src="admin.js"></script>
+  </main>
+</body>
+</html>
