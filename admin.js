@@ -99,7 +99,7 @@ async function carregarProdutos() {
   tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
   const { data, error } = await factorySupabase.from('factory_catalogo_produtos').select('*').order('ordem');
   if (error) { tbody.innerHTML = '<tr><td colspan="6">Erro ao carregar produtos.</td></tr>'; toast(error.message, true); return; }
-  produtosCache = data || [];
+  produtosCache = (data || []).filter(p => p.categoria !== 'Salada de frutas');
   const listaProdutos = filtroCatalogoAtual.categoria ? produtosCache.filter(p => p.categoria === filtroCatalogoAtual.categoria) : produtosCache;
   if (el('titulo-produtos')) el('titulo-produtos').textContent = filtroCatalogoAtual.categoria || 'Tamanhos dos Copos';
   tbody.innerHTML = listaProdutos.map(p => `<tr>
@@ -116,7 +116,7 @@ async function carregarAdicionais() {
   tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
   const { data, error } = await factorySupabase.from('factory_catalogo_adicionais').select('*').order('ordem');
   if (error) { tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar adicionais.</td></tr>'; toast(error.message, true); return; }
-  adicionaisCache = data || [];
+  adicionaisCache = (data || []).filter(a => a.categoria !== 'Frutas da Salada');
   const listaAdicionais = filtroCatalogoAtual.categoria ? adicionaisCache.filter(p => p.categoria === filtroCatalogoAtual.categoria) : adicionaisCache;
   if (el('titulo-acompanhamentos')) el('titulo-acompanhamentos').textContent = filtroCatalogoAtual.categoria || 'Complementos';
   tbody.innerHTML = listaAdicionais.map(a => `<tr>
@@ -263,8 +263,8 @@ async function salvarStatusPedido() {
 
 async function carregarDashboard() {
   const [p, a, o] = await Promise.all([
-    factorySupabase.from('factory_catalogo_produtos').select('id', { count: 'exact', head: true }),
-    factorySupabase.from('factory_catalogo_adicionais').select('id', { count: 'exact', head: true }),
+    factorySupabase.from('factory_catalogo_produtos').select('id', { count: 'exact', head: true }).neq('categoria', 'Salada de frutas'),
+    factorySupabase.from('factory_catalogo_adicionais').select('id', { count: 'exact', head: true }).neq('categoria', 'Frutas da Salada'),
     factorySupabase.from('pedidos').select('id,total,status')
   ]);
   if (p.error || a.error || o.error) return;
