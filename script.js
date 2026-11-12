@@ -465,7 +465,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   try { await carregarCatalogo(); } catch (err) { console.error('Falha ao carregar cardápio:', err); alert('Não foi possível carregar o cardápio. Tente novamente mais tarde.'); }
   const btnFazerPedidoTopo = document.getElementById('btn-fazer-pedido-topo');
   document.querySelectorAll('[data-acai-pedido]').forEach(btn => btn.addEventListener('click', () => abrirPedido('Açaí', btn.dataset.acaiPedido)));
-  document.querySelectorAll('[data-salada-pedido]').forEach(btn => btn.addEventListener('click', () => abrirPedido('Salada de frutas', btn.dataset.saladaPedido)));
   document.querySelectorAll('[data-page-link]').forEach(link => link.addEventListener('click', (ev) => {
     const page = link.dataset.pageLink; if (!page) return; ev.preventDefault();
     document.querySelectorAll('.page-view').forEach(view => view.classList.toggle('active', view.dataset.page === page));
@@ -505,7 +504,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   const paginaInicial = (location.hash || '#inicio').replace('#', '');
-  if (['inicio','acai','salada','sobre','contato'].includes(paginaInicial)) {
+  if (['inicio','acai','sobre','contato'].includes(paginaInicial)) {
     document.querySelectorAll('.page-view').forEach(view => view.classList.toggle('active', view.dataset.page === paginaInicial));
     document.querySelectorAll('[data-page-link]').forEach(a => a.classList.toggle('active', a.dataset.pageLink === paginaInicial));
   }
