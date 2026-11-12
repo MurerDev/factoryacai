@@ -27,7 +27,6 @@
       <nav class="nav" id="nav">
         <a href="#inicio" data-page-link="inicio" class="active">Início</a>
         <a href="#acai" data-page-link="acai">Açaí</a>
-        <a href="#salada" data-page-link="salada">Salada de frutas</a>
         <a href="#sobre" data-page-link="sobre">Sobre</a>
         <a href="#contato" data-page-link="contato">Contato</a>
         <a href="#" class="btn-consultar" id="btn-rastrear">📦 Consultar Pedido</a>
@@ -47,15 +46,17 @@
   <section class="page-view page-home active" data-page="inicio">
     <section class="hero">
       <div class="container hero-inner">
-        <h1>O melhor açaí <span class="accent">na sua porta</span></h1>
-        <p>Açaí cremoso, frutas frescas e combinações feitas para você. Escolha sua categoria e faça seu pedido.</p>
-        <div class="home-categories">
-          <a href="#acai" class="category-card category-acai" data-page-link="acai">
-            <span class="category-emoji">🫐</span><strong>Açaí</strong><small>Monte do seu jeito</small><span class="category-link">Ver opções →</span>
-          </a>
-          <a href="#salada" class="category-card category-salada" data-page-link="salada">
-            <span class="category-emoji">🍓</span><strong>Salada de frutas</strong><small>Fresquinha e deliciosa</small><span class="category-link">Ver opções →</span>
-          </a>
+        <span class="hero-tag">🫐 Seu açaí favorito começa aqui</span>
+        <h1>Seu momento pede <span class="accent">açaí!</span></h1>
+        <p>Açaí cremoso, frutas frescas e os complementos que você ama. Monte do seu jeito e peça em poucos passos.</p>
+        <div class="hero-order-actions">
+          <a href="#acai" class="btn btn-hero-order" data-page-link="acai">🛒 FAZER MEU PEDIDO <span aria-hidden="true">→</span></a>
+          <span class="hero-order-note">Escolha o copo, personalize e pronto!</span>
+        </div>
+        <div class="hero-highlights" aria-label="Vantagens da Factory Açaí">
+          <span>🍇 Frutas fresquinhas</span>
+          <span>🥣 Monte do seu jeito</span>
+          <span>🛵 Peça sem sair de casa</span>
         </div>
       </div>
     </section>
@@ -70,29 +71,14 @@
 
       <a href="#" class="btn btn-primary btn-fazer-pedido topo" id="btn-fazer-pedido-topo">🫐 Fazer Pedido</a>
 
-      <div class="salada-size-grid acai-size-grid">
-        <article class="salada-size-card"><span>🫐</span><h3>300 ml</h3><p>Mini Fábrica</p><strong>R$ 16,00</strong><button class="btn btn-primary" type="button" data-acai-pedido="300ml">Montar açaí</button></article>
-        <article class="salada-size-card"><span>🫐</span><h3>500 ml</h3><p>Alta Produção</p><strong>R$ 19,00</strong><button class="btn btn-primary" type="button" data-acai-pedido="500ml">Montar açaí</button></article>
-        <article class="salada-size-card"><span>🫐</span><h3>700 ml</h3><p>Potência Máxima</p><strong>R$ 25,00</strong><button class="btn btn-primary" type="button" data-acai-pedido="700ml">Montar açaí</button></article>
+      <div class="copo-size-grid acai-size-grid">
+        <article class="copo-size-card"><span>🫐</span><h3>300 ml</h3><p>Mini Fábrica</p><strong>R$ 16,00</strong><button class="btn btn-primary" type="button" data-acai-pedido="300ml">Montar açaí</button></article>
+        <article class="copo-size-card"><span>🫐</span><h3>500 ml</h3><p>Alta Produção</p><strong>R$ 19,00</strong><button class="btn btn-primary" type="button" data-acai-pedido="500ml">Montar açaí</button></article>
+        <article class="copo-size-card"><span>🫐</span><h3>700 ml</h3><p>Potência Máxima</p><strong>R$ 25,00</strong><button class="btn btn-primary" type="button" data-acai-pedido="700ml">Montar açaí</button></article>
       </div>
     </div>
   </section>
 
-  <section class="page-view page-salada" data-page="salada">
-    <div class="container category-page-container">
-      <header class="section-header">
-        <h2>Salada de <span class="accent">frutas</span></h2>
-        <p>Uma opção leve, colorida e preparada com frutas fresquinhas.</p>
-      </header>
-      <div class="salada-intro-note">Escolha o tamanho e monte sua salada. Cada tamanho já inclui uma quantidade de opções de frutas; você também pode selecionar frutas extras. <strong>O valor das frutas extras será definido posteriormente.</strong></div>
-      <div class="salada-size-grid">
-        <article class="salada-size-card"><span>🍓</span><h3>300 ml</h3><p>Até 3 opções de frutas</p><strong>R$ 11,00</strong><button class="btn btn-primary" type="button" data-salada-pedido="salada-300ml">Montar salada</button></article>
-        <article class="salada-size-card"><span>🍍</span><h3>500 ml</h3><p>Até 4 opções de frutas</p><strong>R$ 17,00</strong><button class="btn btn-primary" type="button" data-salada-pedido="salada-500ml">Montar salada</button></article>
-        <article class="salada-size-card"><span>🍇</span><h3>700 ml</h3><p>Até 5 opções de frutas</p><strong>R$ 23,00</strong><button class="btn btn-primary" type="button" data-salada-pedido="salada-700ml">Montar salada</button></article>
-      </div>
-      <div class="salada-frutas-lista"><h3>🍓 Frutas disponíveis</h3><p>Morango · Maracujá · Banana · Kiwi · Uva verde sem semente · Abacaxi · Manga · Laranja · Maçã verde</p></div>
-    </div>
-  </section>
 
   <section id="sobre" class="sobre page-view" data-page="sobre">
     <div class="container sobre-inner">
