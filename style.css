@@ -2345,3 +2345,10 @@ input, select, textarea, button { max-width:100%; }
   .hero-highlights { flex-direction:column; align-items:center; }
   .hero-highlights span { width:max-content; max-width:100%; }
 }
+
+
+/* Aviso de loja aberta/fechada */
+.store-notice{position:relative;z-index:20;text-align:center;padding:11px 16px;font-weight:700;font-size:.92rem;letter-spacing:.1px}
+.store-notice-open{background:#e8f7ed;color:#176b37;border-bottom:1px solid #c5e8d0}
+.store-notice-closed{background:#fff0f0;color:#a61b1b;border-bottom:1px solid #f1caca}
+#cart-btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1)}
