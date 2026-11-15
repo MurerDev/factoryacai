@@ -86,6 +86,46 @@ let acompanhamentos = [
 ];
 
 let carrinho = [];
+let lojaAberta = true;
+let avisoLojaStatus = null;
+
+async function carregarStatusFuncionamento() {
+  try {
+    const { data, error } = await factorySupabase.from('factory_configuracoes').select('loja_aberta').eq('id', 'principal').maybeSingle();
+    if (error) throw error;
+    lojaAberta = data?.loja_aberta !== false;
+  } catch (error) {
+    console.error('Não foi possível consultar o funcionamento da loja:', error);
+    // Segurança: se não for possível confirmar o status, não liberar novos pedidos.
+    lojaAberta = false;
+  }
+  atualizarInterfaceFuncionamento();
+}
+
+function atualizarInterfaceFuncionamento() {
+  if (!avisoLojaStatus) {
+    avisoLojaStatus = document.createElement('div');
+    avisoLojaStatus.id = 'aviso-status-loja';
+    avisoLojaStatus.setAttribute('role', 'status');
+    const header = document.querySelector('.header');
+    if (header) header.insertAdjacentElement('afterend', avisoLojaStatus);
+  }
+  if (avisoLojaStatus) {
+    avisoLojaStatus.textContent = lojaAberta ? '🟢 Loja aberta — estamos recebendo pedidos!' : '🔴 Loja fechada ou indisponível — não estamos recebendo pedidos.';
+    avisoLojaStatus.className = lojaAberta ? 'store-notice store-notice-open' : 'store-notice store-notice-closed';
+    avisoLojaStatus.hidden = false;
+  }
+  const cartButton = document.getElementById('cart-btn');
+  if (cartButton) { cartButton.disabled = !lojaAberta; cartButton.setAttribute('aria-label', lojaAberta ? 'Carrinho de compras' : 'Loja fechada'); }
+  const checkoutButton = document.getElementById('btn-checkout');
+  if (checkoutButton && !lojaAberta) { checkoutButton.disabled = true; checkoutButton.textContent = 'Loja fechada'; }
+}
+
+function bloquearSeLojaFechada() {
+  if (lojaAberta) return false;
+  alert('A Factory Açaí está fechada no momento e não está recebendo pedidos.');
+  return true;
+}
 const modalState = {
   etapa: 1,
   tamanho: null,
@@ -166,6 +206,7 @@ function fecharModal(id) {
 }
 
 function abrirPedido(categoria = 'Açaí', tamanhoInicial = null) {
+  if (bloquearSeLojaFechada()) return;
   categoriaPedido = categoria;
   modalState.etapa = 1;
   modalState.tamanho = tamanhoInicial;
@@ -463,6 +504,11 @@ function atualizarCarrinho() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try { await carregarCatalogo(); } catch (err) { console.error('Falha ao carregar cardápio:', err); alert('Não foi possível carregar o cardápio. Tente novamente mais tarde.'); }
+  await carregarStatusFuncionamento();
+  const canalStatusLoja = factorySupabase.channel('factory-status-loja-publico')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'factory_configuracoes' }, carregarStatusFuncionamento)
+    .subscribe();
+  window.addEventListener('beforeunload', () => factorySupabase.removeChannel(canalStatusLoja));
   const btnFazerPedidoTopo = document.getElementById('btn-fazer-pedido-topo');
   document.querySelectorAll('[data-acai-pedido]').forEach(btn => btn.addEventListener('click', () => abrirPedido('Açaí', btn.dataset.acaiPedido)));
   document.querySelectorAll('[data-page-link]').forEach(link => link.addEventListener('click', (ev) => {
@@ -521,6 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnCart = document.getElementById('cart-btn');
   if (btnCart) {
     btnCart.addEventListener('click', () => {
+      if (bloquearSeLojaFechada()) return;
       const cart = document.getElementById('carrinho');
       if (cart) {
         const estaAberto = cart.getAttribute('data-aberto') === 'true';
@@ -539,6 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (btnCheckout) {
     btnCheckout.addEventListener('click', () => {
+      if (bloquearSeLojaFechada()) return;
       // Fecha completamente o carrinho antes de abrir o checkout.
       // Isso evita que o drawer (z-index maior) cubra o formulário em celulares.
       if (cartDrawer) {
@@ -733,6 +781,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (formCheckout) {
     formCheckout.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (bloquearSeLojaFechada()) return;
 
       const campoNome = formCheckout.querySelector('#checkout-nome');
       const campoEndereco = formCheckout.querySelector('#checkout-endereco');
