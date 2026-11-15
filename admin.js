@@ -81,6 +81,31 @@ const app = {
 window.app = app;
 window.fecharModalPedidoDetalhes = () => fecharModal('modal-pedido-detalhes');
 
+
+async function carregarStatusLoja() {
+  const { data, error } = await factorySupabase.from('factory_configuracoes').select('loja_aberta').eq('id', 'principal').maybeSingle();
+  if (error) { console.error('Erro ao carregar status da loja:', error); if (el('store-status-label')) el('store-status-label').textContent = 'Não foi possível carregar. Execute o SQL de configuração.'; if (el('btn-store-open')) el('btn-store-open').disabled = true; if (el('btn-store-close')) el('btn-store-close').disabled = true; toast('Execute o SQL CONFIGURAR_STATUS_LOJA.sql no Supabase.', true); return; }
+  atualizarStatusLojaVisual(data?.loja_aberta !== false);
+}
+
+function atualizarStatusLojaVisual(aberta) {
+  const label = el('store-status-label');
+  const btnOpen = el('btn-store-open');
+  const btnClose = el('btn-store-close');
+  if (label) { label.textContent = aberta ? '🟢 A loja está ABERTA e recebendo pedidos' : '🔴 A loja está FECHADA e não recebe pedidos'; label.classList.toggle('is-open', aberta); label.classList.toggle('is-closed', !aberta); }
+  if (btnOpen) btnOpen.disabled = aberta;
+  if (btnClose) btnClose.disabled = !aberta;
+}
+
+async function definirStatusLoja(aberta) {
+  const btnOpen = el('btn-store-open'); const btnClose = el('btn-store-close');
+  if (btnOpen) btnOpen.disabled = true; if (btnClose) btnClose.disabled = true;
+  const { error } = await factorySupabase.from('factory_configuracoes').upsert({ id: 'principal', loja_aberta: aberta, atualizado_em: new Date().toISOString() }, { onConflict: 'id' });
+  if (error) { toast(`Não foi possível alterar o funcionamento: ${error.message}`, true); await carregarStatusLoja(); return; }
+  atualizarStatusLojaVisual(aberta);
+  toast(aberta ? 'Loja aberta! Os clientes já podem pedir.' : 'Loja fechada! Novos pedidos foram bloqueados.');
+}
+
 async function verificarAdministrador() {
   const { data: { user }, error } = await factorySupabase.auth.getUser();
   if (error || !user) { window.location.replace('index.html'); return false; }
@@ -387,6 +412,8 @@ function vincularEventos() {
   document.querySelectorAll('.nav-item[data-view]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); app.mudarView(a.dataset.view, a.dataset.categoria || null); fecharMenu(); }));
   el('btn-logout')?.addEventListener('click', async e => { e.preventDefault(); await factorySupabase.auth.signOut(); window.location.replace('index.html'); });
   el('btn-novo-produto')?.addEventListener('click', () => abrirFormulario('produto'));
+  el('btn-store-open')?.addEventListener('click', () => definirStatusLoja(true));
+  el('btn-store-close')?.addEventListener('click', () => definirStatusLoja(false));
   el('btn-novo-acompanhamento')?.addEventListener('click', () => abrirFormulario('adicional'));
   el('form-item')?.addEventListener('submit', salvarItem);
   el('form-emoji')?.addEventListener('input', atualizarPreviewEmoji);
@@ -424,10 +451,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const autorizado = await verificarAdministrador();
   if (!autorizado) return;
   vincularEventos();
-  await Promise.all([carregarDashboard(), carregarProdutos(), carregarAdicionais(), carregarPedidos()]);
+  await Promise.all([carregarDashboard(), carregarProdutos(), carregarAdicionais(), carregarPedidos(), carregarStatusLoja()]);
   const canal = factorySupabase.channel('factory-pedidos-admin')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, async () => {
       await carregarPedidos(); await carregarDashboard(); await carregarFechamento();
-    }).subscribe();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'factory_configuracoes' }, carregarStatusLoja)
+    .subscribe();
   window.addEventListener('beforeunload', () => factorySupabase.removeChannel(canal));
 });
