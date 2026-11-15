@@ -111,7 +111,7 @@ function atualizarInterfaceFuncionamento() {
     if (header) header.insertAdjacentElement('afterend', avisoLojaStatus);
   }
   if (avisoLojaStatus) {
-    avisoLojaStatus.textContent = lojaAberta ? '🟢 Loja aberta — estamos recebendo pedidos!' : '🔴 Loja fechada ou indisponível — não estamos recebendo pedidos.';
+    avisoLojaStatus.textContent = lojaAberta ? '🟢 Loja aberta — estamos recebendo pedidos!' : '🔴 Loja fechada — não estamos recebendo pedidos.';
     avisoLojaStatus.className = lojaAberta ? 'store-notice store-notice-open' : 'store-notice store-notice-closed';
     avisoLojaStatus.hidden = false;
   }
